@@ -8,6 +8,9 @@ struct Node {
 	Color color;
 	Node* left;
 	Node* right;
+        Node* sibling();
+        Node* parent();
+        Node* uncle();
 };
 
 class RB_Tree {
