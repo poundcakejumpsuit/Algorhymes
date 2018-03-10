@@ -6,9 +6,9 @@ enum Color {RED, BLACK};
 class Node {
 public:
 	Node();
-	Node(int d);
+	Node(int d, Color c=RED, Node* l=nullptr, Node* r=nullptr, Node* p=nullptr);
 	~Node();
-private:
+public:
 	int data;
 	Color color;
 	Node* left;
