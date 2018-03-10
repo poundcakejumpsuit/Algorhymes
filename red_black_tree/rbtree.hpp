@@ -19,6 +19,6 @@ public:
 	void rotate_left(Node* node);
 	void delete_node(Node* node);
 private:
-	Node root;
+	Node* root;
 	uint64_t size;
 };
