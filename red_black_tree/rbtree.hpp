@@ -3,14 +3,21 @@
 
 enum Color {RED, BLACK};
 
-struct Node {
+class Node {
+public:
+	Node();
+	Node(int d);
+	~Node();
+private:
 	int data;
 	Color color;
 	Node* left;
 	Node* right;
-        Node* sibling();
-        Node* parent();
-        Node* uncle();
+	Node* parent;
+	Node* get_sibling();
+	Node* get_uncle();
+	Node* get_grandparent();
+	friend class RB_Tree;
 };
 
 class RB_Tree {
