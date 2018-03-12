@@ -94,9 +94,7 @@ RB_Tree::~RB_Tree() {
 
 void RB_Tree::rotate_left(Node* n) {
 	Node* n_new = n->right;
-	assert(n_new->left != nullptr || n_new->right != nullptr);
 	n->right = n_new->left;
-	// n_new->right->parent = n->parent;
 	n_new->left = n;
 	n_new->parent = n->parent;
 	if (n->parent != nullptr) {
@@ -112,9 +110,7 @@ void RB_Tree::rotate_left(Node* n) {
 
 void RB_Tree::rotate_right(Node* n) {
 	Node* n_new = n->left;
-	assert(n_new->left != nullptr || n_new->right != nullptr);
 	n->left = n_new->right;
-	// n_new->left->parent = n->parent;
 	n_new->right = n;
 	n_new->parent = n->parent;
 	if (n->parent != nullptr) {
@@ -292,12 +288,13 @@ int main(int argc, char* argv[]) {
 	// n4->left = n10;
 	// n4->right = n11;
 	RB_Tree* rb = new RB_Tree();
+	rb->insert(n6);
+	rb->insert(n5);
+	rb->insert(n4);
 	rb->insert(n1);
+	rb->print();
 	rb->insert(n2);
 	rb->insert(n3);
-	rb->insert(n4);
-	rb->insert(n5);
-	rb->insert(n6);
 
 	rb->print();
 	// std::cout << "--------------------------------------" << std::endl;
