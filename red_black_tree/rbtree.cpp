@@ -90,7 +90,7 @@ RB_Tree::~RB_Tree() {
 
 void RB_Tree::rotate_left(Node* n) {
 	Node* n_new = n->right;
-	assert(n_new->left != nullptr && n_new->right != nullptr);
+	assert(n_new->left != nullptr || n_new->right != nullptr);
 	n->right = n_new->left;
 	n_new->right->parent = n->parent;
 	n_new->left = n;
@@ -108,7 +108,7 @@ void RB_Tree::rotate_left(Node* n) {
 
 void RB_Tree::rotate_right(Node* n) {
 	Node* n_new = n->left;
-	assert(n_new->left != nullptr && n_new->right != nullptr);
+	assert(n_new->left != nullptr || n_new->right != nullptr);
 	n->left = n_new->right;
 	n_new->left->parent = n->parent;
 	n_new->right = n;
@@ -126,7 +126,7 @@ void RB_Tree::rotate_right(Node* n) {
 
 void RB_Tree::postorder(Node* p, int indent)
 {
-    if(p != NULL) {
+    if(p != nullptr) {
         if(p->right) {
             postorder(p->right, indent+4);
         }
@@ -142,37 +142,145 @@ void RB_Tree::postorder(Node* p, int indent)
     }
 }
 
+void RB_Tree::insert(Node* n) {
+	insert_recurse(root, n);
+	insert_repair_tree(n);
+	root = n;
+	while (root->parent != nullptr) {
+		root = root->parent;
+	}
+}
+
+void RB_Tree::insert_recurse(Node* cur_node, Node* n) {
+	if (cur_node != nullptr && n->data < cur_node->data) {
+		if (cur_node->left != nullptr && 
+			(cur_node->left->left != nullptr || 
+						cur_node->left->right != nullptr)) {
+			insert_recurse(cur_node->left, n);
+			return;
+		}
+		else {
+			cur_node->left = n;
+		}
+	}
+	else if (cur_node != nullptr) {
+		if (cur_node->right != nullptr && 
+			(cur_node->right->right != nullptr || 
+						cur_node->right->left != nullptr)) {
+		std::cout << "here" << std::endl;
+
+			insert_recurse(cur_node->right, n);
+			return;
+		}
+		else {
+			if (root != nullptr) {
+				cur_node->right = n;
+			}
+			else {
+				root = n;
+			}
+		}
+	}
+	n->parent = cur_node;
+	n->left = nullptr;
+	n->right = nullptr;
+	n->color = RED;
+}
+
+void RB_Tree::insert_repair_tree(Node* n) {
+	if (n->parent == nullptr) {
+		insert_case1(n);
+	}
+	else if (n->parent->color == BLACK) {
+		insert_case2(n);
+	}
+	else if (n->get_uncle()->color == RED) {
+		insert_case3(n);
+	}
+	else {
+		insert_case4(n);
+	}
+}
+
+void RB_Tree::insert_case1(Node* n) {
+	if (n->parent == nullptr) {
+		n->color = BLACK;
+	}
+}
+
+void RB_Tree::insert_case2(Node* n) {
+	return;
+}
+
+void RB_Tree::insert_case3(Node* n) {
+	n->parent->color = BLACK;
+	n->get_uncle()->color = BLACK;
+	n->get_grandparent()->color = RED;
+	insert_repair_tree(n->get_grandparent());
+}
+
+void RB_Tree::insert_case4(Node* n) {
+	Node* p = n->parent;
+	Node* g = n->get_grandparent();
+	if (n == g->left->right) {
+		rotate_left(p);
+		n = n->left;
+	}
+	else if (n == g->right->left) {
+		rotate_right(p);
+		n = n->right;
+	}
+	insert_case4step2(n);
+}
+
+void RB_Tree::insert_case4step2(Node* n) {
+	Node* p = n->parent;
+	Node* g = n->get_grandparent();
+	if (n == p->left) {
+		rotate_right(g);
+	}
+	else {
+		rotate_left(g);
+	}
+	p->color = BLACK;
+	g->color = RED;
+}
+
+
 int main(int argc, char* argv[]) {
 	//Node(int d, Color c, Node* l, Node* r, Node* p)
 	Node* n1 = new Node(1);
-	Node* n2 = new Node(2, RED, nullptr, nullptr, n1);
-	Node* n3 = new Node(3, RED, nullptr, nullptr, n1);
-	n1->left = n2;
-	n1->right = n3;
-	Node* n4 = new Node(4, RED, nullptr, nullptr, n2);
-	Node* n5 = new Node(5, RED, nullptr, nullptr, n2);
-	Node* n6 = new Node(6, RED, nullptr, nullptr, n3);
-	Node* n7 = new Node(7, RED, nullptr, nullptr, n3);
-	n2->left = n4;
-	n2->right = n5;
-	n3->left = n6;
-	n3->right = n7;
-	Node* n8 = new Node(8, RED, nullptr, nullptr, n5);
-	Node* n9 = new Node(9, RED, nullptr, nullptr, n5);
-	Node* n10 = new Node(10, RED, nullptr, nullptr, n4);
-	Node* n11 = new Node(11, RED, nullptr, nullptr, n4);
-	n5->left = n8;
-	n5->right = n9;
-	n4->left = n10;
-	n4->right = n11;
-	RB_Tree* rb = new RB_Tree(n1);
+	Node* n2 = new Node(2);
+	Node* n3 = new Node(3);
+	// n1->left = n2;
+	// n1->right = n3;
+	// Node* n4 = new Node(4, RED, nullptr, nullptr, n2);
+	// Node* n5 = new Node(5, RED, nullptr, nullptr, n2);
+	// Node* n6 = new Node(6, RED, nullptr, nullptr, n3);
+	// Node* n7 = new Node(7, RED, nullptr, nullptr, n3);
+	// n2->left = n4;
+	// n2->right = n5;
+	// n3->left = n6;
+	// n3->right = n7;
+	// Node* n8 = new Node(8, RED, nullptr, nullptr, n5);
+	// Node* n9 = new Node(9, RED, nullptr, nullptr, n5);
+	// Node* n10 = new Node(10, RED, nullptr, nullptr, n4);
+	// Node* n11 = new Node(11, RED, nullptr, nullptr, n4);
+	// n5->left = n8;
+	// n5->right = n9;
+	// n4->left = n10;
+	// n4->right = n11;
+	RB_Tree* rb = new RB_Tree();
+	rb->insert(n1);
+	rb->insert(n2);
+	rb->insert(n3);
 	rb->postorder(n1);
-	std::cout << "--------------------------------------" << std::endl;
-	rb->rotate_right(n2);
-	rb->postorder(n1);
-	rb->rotate_left(n4);
-	std::cout << "--------------------------------------" << std::endl;
-	rb->postorder(n1);
+	// std::cout << "--------------------------------------" << std::endl;
+	// rb->rotate_right(n2);
+	// rb->postorder(n1);
+	// rb->rotate_left(n4);
+	// std::cout << "--------------------------------------" << std::endl;
+	// rb->postorder(n1);
 
 	// std::cout << n4->get_uncle()->data << std::endl;
 	// std::cout << n4->get_sibling()->data << std::endl;

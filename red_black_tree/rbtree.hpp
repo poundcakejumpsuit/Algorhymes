@@ -26,7 +26,14 @@ public:
 	RB_Tree();
 	RB_Tree(Node* r);
 	~RB_Tree();
-	void insert(Node* node);
+	void insert(Node* n);
+	void insert_recurse(Node* cur_node, Node* n);
+	void insert_repair_tree(Node* n);
+	void insert_case1(Node* n);
+	void insert_case2(Node* n);
+	void insert_case3(Node* n);
+	void insert_case4(Node* n);
+	void insert_case4step2(Node* n);
 	void rotate_right(Node* node);
 	void rotate_left(Node* node);
 	void delete_node(Node* node);
