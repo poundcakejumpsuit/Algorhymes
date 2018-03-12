@@ -38,6 +38,7 @@ public:
 	void rotate_left(Node* node);
 	void delete_node(Node* node);
 	void postorder(Node* n, int indent=0);
+	void print();
 private:
 	Node* root;
 	uint64_t size;

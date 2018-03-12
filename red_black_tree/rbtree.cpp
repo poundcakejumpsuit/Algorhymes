@@ -41,19 +41,23 @@ Node* Node::get_uncle() {
 		std::cout << "No grandparent!" << std::endl;
 		return nullptr;
 	}
-	if (parent->data == parent->parent->left->data) {
-		if (parent->parent->right == nullptr) {
-			std::cout << "No right uncle!" << std::endl;
-			return nullptr;
+	if (parent->parent->left != nullptr) {
+		if (parent->data == parent->parent->left->data) {
+			if (parent->parent->right == nullptr) {
+				std::cout << "No right uncle!" << std::endl;
+				return nullptr;
+			}
+			return parent->parent->right;
 		}
-		return parent->parent->right;
 	}
-	if (parent->data == parent->parent->right->data) {
-		if (parent->parent->left == nullptr) {
-			std::cout << "No left uncle!" << std::endl;
-			return nullptr;
+	if (parent->parent->right != nullptr || parent->parent->left != nullptr) {
+		if (parent->data == parent->parent->right->data) {
+			if (parent->parent->left == nullptr) {
+				std::cout << "No left uncle!" << std::endl;
+				return nullptr;
+			}
+			return parent->parent->left;
 		}
-		return parent->parent->left;
 	}
 	return nullptr;
 }
@@ -92,7 +96,7 @@ void RB_Tree::rotate_left(Node* n) {
 	Node* n_new = n->right;
 	assert(n_new->left != nullptr || n_new->right != nullptr);
 	n->right = n_new->left;
-	n_new->right->parent = n->parent;
+	// n_new->right->parent = n->parent;
 	n_new->left = n;
 	n_new->parent = n->parent;
 	if (n->parent != nullptr) {
@@ -110,7 +114,7 @@ void RB_Tree::rotate_right(Node* n) {
 	Node* n_new = n->left;
 	assert(n_new->left != nullptr || n_new->right != nullptr);
 	n->left = n_new->right;
-	n_new->left->parent = n->parent;
+	// n_new->left->parent = n->parent;
 	n_new->right = n;
 	n_new->parent = n->parent;
 	if (n->parent != nullptr) {
@@ -124,8 +128,7 @@ void RB_Tree::rotate_right(Node* n) {
 	n->parent = n_new;
 }
 
-void RB_Tree::postorder(Node* p, int indent)
-{
+void RB_Tree::postorder(Node * p, int indent) {
     if(p != nullptr) {
         if(p->right) {
             postorder(p->right, indent+4);
@@ -142,6 +145,11 @@ void RB_Tree::postorder(Node* p, int indent)
     }
 }
 
+void RB_Tree::print() {
+	postorder(root);
+	std::cout << "_________________________________________________" << std::endl;
+}
+
 void RB_Tree::insert(Node* n) {
 	insert_recurse(root, n);
 	insert_repair_tree(n);
@@ -152,26 +160,30 @@ void RB_Tree::insert(Node* n) {
 }
 
 void RB_Tree::insert_recurse(Node* cur_node, Node* n) {
+	//left subtree
 	if (cur_node != nullptr && n->data < cur_node->data) {
-		if (cur_node->left != nullptr && 
-			(cur_node->left->left != nullptr || 
-						cur_node->left->right != nullptr)) {
+		//non-leaf node
+		if (cur_node->left != nullptr || cur_node->right != nullptr) {// && 
+			// (cur_node->left->left != nullptr || 
+			// 			cur_node->left->right != nullptr)) {
 			insert_recurse(cur_node->left, n);
 			return;
 		}
+		//leaf-node
 		else {
 			cur_node->left = n;
 		}
 	}
-	else if (cur_node != nullptr) {
-		if (cur_node->right != nullptr && 
-			(cur_node->right->right != nullptr || 
-						cur_node->right->left != nullptr)) {
-		std::cout << "here" << std::endl;
-
+	//right subtree
+	else if (cur_node != nullptr) {		
+		//non-leaf node
+		if (cur_node->right != nullptr || cur_node->left != nullptr) {
+			// (cur_node->right->right != nullptr || 
+			// 			cur_node->right->left != nullptr)) {
 			insert_recurse(cur_node->right, n);
 			return;
 		}
+		//leaf-node
 		else {
 			if (root != nullptr) {
 				cur_node->right = n;
@@ -194,7 +206,7 @@ void RB_Tree::insert_repair_tree(Node* n) {
 	else if (n->parent->color == BLACK) {
 		insert_case2(n);
 	}
-	else if (n->get_uncle()->color == RED) {
+	else if (n->get_uncle() != nullptr && n->get_uncle()->color == RED) {
 		insert_case3(n);
 	}
 	else {
@@ -203,12 +215,14 @@ void RB_Tree::insert_repair_tree(Node* n) {
 }
 
 void RB_Tree::insert_case1(Node* n) {
+	//n is root
 	if (n->parent == nullptr) {
 		n->color = BLACK;
 	}
 }
 
 void RB_Tree::insert_case2(Node* n) {
+	//n has a black parent
 	return;
 }
 
@@ -222,13 +236,17 @@ void RB_Tree::insert_case3(Node* n) {
 void RB_Tree::insert_case4(Node* n) {
 	Node* p = n->parent;
 	Node* g = n->get_grandparent();
-	if (n == g->left->right) {
-		rotate_left(p);
-		n = n->left;
+	if (g->left != nullptr) {
+		if (n == g->left->right) {
+			rotate_left(p);
+			n = n->left;
+		}
 	}
-	else if (n == g->right->left) {
-		rotate_right(p);
-		n = n->right;
+	else if (g->right->left != nullptr) {
+		if (n == g->right->left) {
+			rotate_right(p);
+			n = n->right;
+		}
 	}
 	insert_case4step2(n);
 }
@@ -252,6 +270,9 @@ int main(int argc, char* argv[]) {
 	Node* n1 = new Node(1);
 	Node* n2 = new Node(2);
 	Node* n3 = new Node(3);
+	Node* n4 = new Node(4);
+	Node* n5 = new Node(5);
+	Node* n6 = new Node(6);
 	// n1->left = n2;
 	// n1->right = n3;
 	// Node* n4 = new Node(4, RED, nullptr, nullptr, n2);
@@ -274,7 +295,11 @@ int main(int argc, char* argv[]) {
 	rb->insert(n1);
 	rb->insert(n2);
 	rb->insert(n3);
-	rb->postorder(n1);
+	rb->insert(n4);
+	rb->insert(n5);
+	rb->insert(n6);
+
+	rb->print();
 	// std::cout << "--------------------------------------" << std::endl;
 	// rb->rotate_right(n2);
 	// rb->postorder(n1);
