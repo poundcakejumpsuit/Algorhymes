@@ -2,6 +2,9 @@
 #include <limits>
 #include <cassert>
 #include <iomanip>
+#include <vector>
+#include <algorithm>
+#include <random>
 #include "rbtree.hpp"
 
 Node::Node() {
@@ -34,17 +37,14 @@ Node* Node::get_sibling() {
 
 Node* Node::get_uncle() {
 	if (parent == nullptr) {
-		std::cout << "No parent!" << std::endl;
 		return nullptr;
 	}
 	if (parent->parent == nullptr) {
-		std::cout << "No grandparent!" << std::endl;
 		return nullptr;
 	}
 	if (parent->parent->left != nullptr) {
 		if (parent->data == parent->parent->left->data) {
 			if (parent->parent->right == nullptr) {
-				std::cout << "No right uncle!" << std::endl;
 				return nullptr;
 			}
 			return parent->parent->right;
@@ -53,7 +53,6 @@ Node* Node::get_uncle() {
 	if (parent->parent->right != nullptr || parent->parent->left != nullptr) {
 		if (parent->data == parent->parent->right->data) {
 			if (parent->parent->left == nullptr) {
-				std::cout << "No left uncle!" << std::endl;
 				return nullptr;
 			}
 			return parent->parent->left;
@@ -262,49 +261,18 @@ void RB_Tree::insert_case4step2(Node* n) {
 
 
 int main(int argc, char* argv[]) {
-	//Node(int d, Color c, Node* l, Node* r, Node* p)
-	Node* n1 = new Node(1);
-	Node* n2 = new Node(2);
-	Node* n3 = new Node(3);
-	Node* n4 = new Node(4);
-	Node* n5 = new Node(5);
-	Node* n6 = new Node(6);
-	// n1->left = n2;
-	// n1->right = n3;
-	// Node* n4 = new Node(4, RED, nullptr, nullptr, n2);
-	// Node* n5 = new Node(5, RED, nullptr, nullptr, n2);
-	// Node* n6 = new Node(6, RED, nullptr, nullptr, n3);
-	// Node* n7 = new Node(7, RED, nullptr, nullptr, n3);
-	// n2->left = n4;
-	// n2->right = n5;
-	// n3->left = n6;
-	// n3->right = n7;
-	// Node* n8 = new Node(8, RED, nullptr, nullptr, n5);
-	// Node* n9 = new Node(9, RED, nullptr, nullptr, n5);
-	// Node* n10 = new Node(10, RED, nullptr, nullptr, n4);
-	// Node* n11 = new Node(11, RED, nullptr, nullptr, n4);
-	// n5->left = n8;
-	// n5->right = n9;
-	// n4->left = n10;
-	// n4->right = n11;
+	std::vector<Node*> v;
+	for (int i = 1; i < 11; i ++) {
+		Node* n = new Node(i);
+		v.push_back(n);
+	}
+	auto rng = std::default_random_engine {};
+	std::shuffle(std::begin(v), std::end(v), rng);
 	RB_Tree* rb = new RB_Tree();
-	rb->insert(n6);
-	rb->insert(n5);
-	rb->insert(n4);
-	rb->insert(n1);
-	rb->print();
-	rb->insert(n2);
-	rb->insert(n3);
+	for (auto el: v) {
+		std::cout << el->data << std::endl;
+		rb->insert(el);
+	}
 
 	rb->print();
-	// std::cout << "--------------------------------------" << std::endl;
-	// rb->rotate_right(n2);
-	// rb->postorder(n1);
-	// rb->rotate_left(n4);
-	// std::cout << "--------------------------------------" << std::endl;
-	// rb->postorder(n1);
-
-	// std::cout << n4->get_uncle()->data << std::endl;
-	// std::cout << n4->get_sibling()->data << std::endl;
-	// std::cout << n4->get_grandparent()->data << std::endl;
 }
