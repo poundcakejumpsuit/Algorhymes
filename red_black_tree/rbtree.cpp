@@ -27,11 +27,10 @@ Node::Node(int d, Color c, Node* l, Node* r, Node* p) {
 
 Node* Node::get_sibling() {
 	if (parent == nullptr) {
-		std::cout << "No parent!" << std::endl;
 		return nullptr;
 	}
 	//TODO: overload equality for duplicate values?
-	if (this->data == parent->left->data) {
+	if (this == parent->left) {
 		return parent->right;
 	}
 	return parent->left;
@@ -65,11 +64,9 @@ Node* Node::get_uncle() {
 
 Node* Node::get_grandparent() {
 	if (parent == nullptr) {
-		std::cout << "No parent!" << std::endl;
 		return nullptr;
 	}
 	if (parent->parent == nullptr) {
-		std::cout << "No grandparent!" << std::endl;
 		return nullptr;
 	}
 	return parent->parent;
@@ -134,7 +131,9 @@ void RB_Tree::postorder(Node * p, int indent) {
             std::cout << std::setw(indent) << ' ';
         }
         if (p->right) std::cout<<" /\n" << std::setw(indent) << ' ';
-        std::cout<< p->data << "\n ";
+        std::string clr;
+        p->color ? clr = "B" : clr = "R";
+        std::cout<< p->data << clr << "\n ";
         if(p->left) {
             std::cout << std::setw(indent) << ' ' <<" \\\n";
             postorder(p->left, indent+4);
@@ -245,15 +244,27 @@ void RB_Tree::insert_case4(Node* n) {
 	Node* p = n->parent;
 	Node* g = n->get_grandparent();
 	if (g->left != nullptr) {
-		if (n == g->left->right) {
-			rotate_left(p);
-			n = n->left;
+		if (g->left->right != nullptr) {
+			if (n == g->left->right) {
+				rotate_left(p);
+				n = n->left;
+			}
+			else if (g->right != nullptr) {
+				if (g->right->left != nullptr) {
+					if (n == g->right->left) {
+						rotate_right(p);
+						n = n->right;
+					}
+				}
+			}
 		}
 	}
-	else if (g->right->left != nullptr) {
-		if (n == g->right->left) {
-			rotate_right(p);
-			n = n->right;
+	else if (g->right != nullptr) {
+		if (g->right->left != nullptr) {
+			if (n == g->right->left) {
+				rotate_right(p);
+				n = n->right;
+			}
 		}
 	}
 	insert_case4step2(n);
@@ -278,25 +289,22 @@ uint64_t RB_Tree::get_size() {
 
 int main(int argc, char* argv[]) {
 	std::vector<Node*> v;
-	std::vector<int> intv = {7, 4, 2, 6, 9, 3, 5, 10, 8, 1};
-	// for (int i = 1; i < 11; i ++) {
-	for (auto i: intv) {
+	// std::vector<int> intv = {1, 3, 10, 9, 7, 8, 5, 2, 6, 4};
+	for (int i = 1; i <= 1000; i ++) {
+	// for (auto i: intv) {
 		Node* n = new Node(i);
 		v.push_back(n);
 	}
 	// linux rng:
 	// auto rng = std::default_random_engine {};
 	// osx rng:
-	std::random_device rd;
-	std::mt19937 rng(rd());
-	std::shuffle(std::begin(v), std::end(v), rng);
+	// std::random_device rd;
+	// std::mt19937 rng(rd());
+	// std::shuffle(std::begin(v), std::end(v), rng);
 	RB_Tree* rb = new RB_Tree();
 	for (auto el: v) {
-		std::cout << el->data << std::endl;
 		rb->insert(el);
-		std::cout<<std::endl;
-		std::cout << "TREE:" <<std::endl;
-		rb->print();
 	}
+	rb->print();
 	std::cout << rb->get_size() << std::endl;
 }

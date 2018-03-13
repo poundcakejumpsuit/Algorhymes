@@ -1,5 +1,5 @@
 CXX      = g++
-CXXFLAGS = -g -std=c++11 -Wall -pedantic
+CXXFLAGS = -g -std=c++11 -O2 -Wall -pedantic
 
 all: rbtree clean
 
