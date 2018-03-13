@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <random>
 #include <iterator>
+#include <cstdint>
 #include "rbtree.hpp"
 
 Node::Node() {
@@ -154,29 +155,39 @@ void RB_Tree::insert(Node* n) {
 	while (root->parent != nullptr) {
 		root = root->parent;
 	}
+	size++;
 }
 
 void RB_Tree::insert_recurse(Node* cur_node, Node* n) {
 	//left subtree
 	if (cur_node != nullptr && n->data < cur_node->data) {
 		//non-leaf node
-		if (cur_node->left != nullptr || cur_node->right != nullptr) {// && 
-			// (cur_node->left->left != nullptr || 
-			// 			cur_node->left->right != nullptr)) {
+		if (cur_node->left != nullptr) {
+			if (cur_node->right != nullptr) {
+				insert_recurse(cur_node->left, n);
+				return;
+			}
 			insert_recurse(cur_node->left, n);
 			return;
 		}
 		//leaf-node
 		else {
-			cur_node->left = n;
+			if (root != nullptr) {
+				cur_node->left = n;
+			}
+			else {
+				root = n;
+			}
 		}
 	}
 	//right subtree
 	else if (cur_node != nullptr) {		
 		//non-leaf node
-		if (cur_node->right != nullptr || cur_node->left != nullptr) {
-			// (cur_node->right->right != nullptr || 
-			// 			cur_node->right->left != nullptr)) {
+		if (cur_node->right != nullptr) {
+			if (cur_node->left != nullptr) {
+				insert_recurse(cur_node->right, n);
+				return;
+			}
 			insert_recurse(cur_node->right, n);
 			return;
 		}
@@ -261,10 +272,15 @@ void RB_Tree::insert_case4step2(Node* n) {
 	g->color = RED;
 }
 
+uint64_t RB_Tree::get_size() {
+	return size;
+}
 
 int main(int argc, char* argv[]) {
 	std::vector<Node*> v;
-	for (int i = 1; i < 11; i ++) {
+	std::vector<int> intv = {7, 4, 2, 6, 9, 3, 5, 10, 8, 1};
+	// for (int i = 1; i < 11; i ++) {
+	for (auto i: intv) {
 		Node* n = new Node(i);
 		v.push_back(n);
 	}
@@ -278,7 +294,9 @@ int main(int argc, char* argv[]) {
 	for (auto el: v) {
 		std::cout << el->data << std::endl;
 		rb->insert(el);
+		std::cout<<std::endl;
+		std::cout << "TREE:" <<std::endl;
+		rb->print();
 	}
-
-	rb->print();
+	std::cout << rb->get_size() << std::endl;
 }

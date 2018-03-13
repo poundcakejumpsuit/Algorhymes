@@ -39,6 +39,7 @@ public:
 	void delete_node(Node* node);
 	void postorder(Node* n, int indent=0);
 	void print();
+	uint64_t get_size();
 private:
 	Node* root;
 	uint64_t size;
