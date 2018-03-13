@@ -5,6 +5,7 @@
 #include <vector>
 #include <algorithm>
 #include <random>
+#include <iterator>
 #include "rbtree.hpp"
 
 Node::Node() {
@@ -141,6 +142,7 @@ void RB_Tree::postorder(Node * p, int indent) {
 }
 
 void RB_Tree::print() {
+	std::cout << "_________________________________________________" << std::endl;
 	postorder(root);
 	std::cout << "_________________________________________________" << std::endl;
 }
@@ -266,7 +268,11 @@ int main(int argc, char* argv[]) {
 		Node* n = new Node(i);
 		v.push_back(n);
 	}
-	auto rng = std::default_random_engine {};
+	// linux rng:
+	// auto rng = std::default_random_engine {};
+	// osx rng:
+	std::random_device rd;
+	std::mt19937 rng(rd());
 	std::shuffle(std::begin(v), std::end(v), rng);
 	RB_Tree* rb = new RB_Tree();
 	for (auto el: v) {
