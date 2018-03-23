@@ -7,7 +7,11 @@ enum Color {RED, BLACK};
 class Node {
 public:
 	Node();
-	Node(int d=std::numeric_limits<double>::quiet_NaN(), Color c=RED, Node* l=nullptr, Node* r=nullptr, Node* p=nullptr);
+	Node(int d=std::numeric_limits<double>::quiet_NaN(), 
+			Color c=RED, 
+			Node* l=nullptr, 
+			Node* r=nullptr, 
+			Node* p=nullptr);
 	~Node();
 public:
 	int data;
@@ -40,6 +44,10 @@ public:
 	void postorder(Node* n, int indent=0);
 	void print();
 	uint64_t get_size();
+	int black_height(Node* root);
+	int bh();
+	void node_table(Node* n);
+	void node_info(Node* n);
 private:
 	Node* root;
 	uint64_t size;

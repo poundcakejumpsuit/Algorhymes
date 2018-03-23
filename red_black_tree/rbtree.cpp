@@ -7,6 +7,7 @@
 #include <random>
 #include <iterator>
 #include <cstdint>
+#include <cmath>
 #include "rbtree.hpp"
 
 Node::Node() {
@@ -92,7 +93,12 @@ RB_Tree::~RB_Tree() {
 
 void RB_Tree::rotate_left(Node* n) {
 	Node* n_new = n->right;
+	if (n->left == nullptr && n->right == nullptr) {
+		return;
+	}
 	n->right = n_new->left;
+	if (n_new->left)
+		n_new->left->parent = n;
 	n_new->left = n;
 	n_new->parent = n->parent;
 	if (n->parent != nullptr) {
@@ -108,7 +114,12 @@ void RB_Tree::rotate_left(Node* n) {
 
 void RB_Tree::rotate_right(Node* n) {
 	Node* n_new = n->left;
+	if (n->left == nullptr && n->right == nullptr) {
+		return;
+	}
 	n->left = n_new->right;
+	if (n_new->right)
+		n_new->right->parent = n;
 	n_new->right = n;
 	n_new->parent = n->parent;
 	if (n->parent != nullptr) {
@@ -123,8 +134,8 @@ void RB_Tree::rotate_right(Node* n) {
 }
 
 void RB_Tree::postorder(Node * p, int indent) {
-    if(p != nullptr) {
-        if(p->right) {
+    if (p != nullptr) {
+        if (p->right) {
             postorder(p->right, indent+4);
         }
         if (indent) {
@@ -141,8 +152,24 @@ void RB_Tree::postorder(Node * p, int indent) {
     }
 }
 
+void RB_Tree::node_table(Node* n) {
+	if (n) {
+		node_info(n);
+		node_table(n->left);
+		node_table(n->right);
+	}
+}
+
+void RB_Tree::node_info(Node* n) {
+	std::cout << "Node: " << n->data << " left: " << ((n->left != nullptr) ? n->left->data : -1) <<
+		 " right: " << (n->right ? n->right->data : -1) << " parent: " << 
+		 (n->parent ? n->parent->data : -1) << std::endl;
+	std::cout << "=====================================================" << std::endl;
+}
+
 void RB_Tree::print() {
 	std::cout << "_________________________________________________" << std::endl;
+	node_table(root);
 	postorder(root);
 	std::cout << "_________________________________________________" << std::endl;
 }
@@ -162,10 +189,6 @@ void RB_Tree::insert_recurse(Node* cur_node, Node* n) {
 	if (cur_node != nullptr && n->data < cur_node->data) {
 		//non-leaf node
 		if (cur_node->left != nullptr) {
-			if (cur_node->right != nullptr) {
-				insert_recurse(cur_node->left, n);
-				return;
-			}
 			insert_recurse(cur_node->left, n);
 			return;
 		}
@@ -180,7 +203,7 @@ void RB_Tree::insert_recurse(Node* cur_node, Node* n) {
 		}
 	}
 	//right subtree
-	else if (cur_node != nullptr) {		
+	else if (cur_node != nullptr) {
 		//non-leaf node
 		if (cur_node->right != nullptr) {
 			if (cur_node->left != nullptr) {
@@ -243,29 +266,13 @@ void RB_Tree::insert_case3(Node* n) {
 void RB_Tree::insert_case4(Node* n) {
 	Node* p = n->parent;
 	Node* g = n->get_grandparent();
-	if (g->left != nullptr) {
-		if (g->left->right != nullptr) {
-			if (n == g->left->right) {
-				rotate_left(p);
-				n = n->left;
-			}
-			else if (g->right != nullptr) {
-				if (g->right->left != nullptr) {
-					if (n == g->right->left) {
-						rotate_right(p);
-						n = n->right;
-					}
-				}
-			}
-		}
+	if (g->left != nullptr && g->left->right != nullptr && n == g->left->right) {
+		rotate_left(p);
+		n = n->left;
 	}
-	else if (g->right != nullptr) {
-		if (g->right->left != nullptr) {
-			if (n == g->right->left) {
-				rotate_right(p);
-				n = n->right;
-			}
-		}
+	else if (g->right != nullptr && g->right->left != nullptr && n == g->right->left) {
+		rotate_right(p);
+		n = n->right;
 	}
 	insert_case4step2(n);
 }
@@ -287,24 +294,47 @@ uint64_t RB_Tree::get_size() {
 	return size;
 }
 
+int RB_Tree::black_height(Node* root) {
+    if (root == nullptr) {
+        return true;
+    }
+    else {
+        int left = black_height(root->left);
+        if (root->color == BLACK) {
+            left++;
+        }
+        return left;
+    }
+}
+
+int RB_Tree::bh() {
+	return black_height(root);
+	// return computeBlackHeight(root);
+}
+
 int main(int argc, char* argv[]) {
 	std::vector<Node*> v;
-	// std::vector<int> intv = {1, 3, 10, 9, 7, 8, 5, 2, 6, 4};
-	for (int i = 1; i <= 1000; i ++) {
-	// for (auto i: intv) {
+	std::vector<int> intv = {8, 12, 14, 9, 3, 10, 4, 7, 11, 1, 2, 6, 5, 15, 13};
+	int num = 15; 
+	// for (int i = 1; i <= num; i ++) {
+	for (auto i: intv) {
 		Node* n = new Node(i);
 		v.push_back(n);
 	}
 	// linux rng:
 	// auto rng = std::default_random_engine {};
 	// osx rng:
-	// std::random_device rd;
-	// std::mt19937 rng(rd());
-	// std::shuffle(std::begin(v), std::end(v), rng);
+	std::random_device rd;
+	std::mt19937 rng(rd());
+	std::shuffle(std::begin(v), std::end(v), rng);
 	RB_Tree* rb = new RB_Tree();
 	for (auto el: v) {
+		std::cout <<"EL: " << el->data << std::endl;
 		rb->insert(el);
 	}
 	rb->print();
-	std::cout << rb->get_size() << std::endl;
+	bool s = rb->bh() == std::ceil(std::log2(num + 1));
+	bool c = intv.size() == rb->get_size();
+	std::cout << std::ceil(std::log2(num + 1)) << " " << rb->bh() << std::endl;
+	std::cout << s << " " << c << std::endl;
 }
