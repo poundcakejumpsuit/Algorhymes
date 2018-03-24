@@ -299,6 +299,22 @@ Node* RB_Tree::copy_node(Node* orig) {
 	return n;
 }
 
+void RB_Tree::delete_node(Node* n) {
+	if (!(n->left) && !(n->right)) {
+		std::cout << "HERE" << std::endl;
+		if (n == n->parent->right) {
+			n->parent->right = nullptr;
+		}
+		else {
+			n->parent->left = nullptr;
+		}
+		delete n;
+	}
+	else {
+		delete_a_child(n);
+	}
+}
+
 void RB_Tree::replace_node(Node* out, Node* in) {
 	// this function is sad... in just steals out's whole family!
 	if (out->parent) {
@@ -454,7 +470,7 @@ int main(int argc, char* argv[]) {
 		rb->insert(el);
 	}
 	rb->print();
-	rb->delete_a_child(v[7]);
+	rb->delete_node(v[0]);
 	rb->print();
 	bool s = rb->bh() == std::ceil(std::log2(num + 1));
 	bool c = v.size() == rb->get_size();

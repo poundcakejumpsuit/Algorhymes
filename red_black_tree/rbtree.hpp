@@ -40,7 +40,6 @@ public:
 	void insert_case4step2(Node* n);
 	void rotate_right(Node* node);
 	void rotate_left(Node* node);
-	void delete_node(Node* node);
 	void postorder(Node* n, int indent=0);
 	void print();
 	uint64_t get_size();
@@ -48,6 +47,7 @@ public:
 	int bh();
 	void node_table(Node* n);
 	void node_info(Node* n);
+	void delete_node(Node* n);
 	void delete_a_child(Node* n);
 	void delete_case1(Node* n);
 	void delete_case2(Node* n);
