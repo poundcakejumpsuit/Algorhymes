@@ -6,14 +6,14 @@ enum Color {RED, BLACK};
 
 class Node {
 public:
-	Node();
+	// Node();
 	Node(int d=std::numeric_limits<double>::quiet_NaN(), 
 			Color c=RED, 
 			Node* l=nullptr, 
 			Node* r=nullptr, 
 			Node* p=nullptr);
 	~Node();
-public:
+private:
 	int data;
 	Color color;
 	Node* left;
@@ -48,6 +48,14 @@ public:
 	int bh();
 	void node_table(Node* n);
 	void node_info(Node* n);
+	void delete_a_child(Node* n);
+	void delete_case1(Node* n);
+	void delete_case2(Node* n);
+	void delete_case3(Node* n);
+	void delete_case4(Node* n);
+	void delete_case5(Node* n);
+	void replace_node(Node* out, Node* in);
+	Node* copy_node(Node* orig);
 private:
 	Node* root;
 	uint64_t size;
