@@ -2,13 +2,12 @@
 #include <cstdint>
 #include <limits>
 
-enum Color {RED, BLACK};
+enum class Color {RED, BLACK};
 
 class Node {
 public:
-	// Node();
-	Node(int d=std::numeric_limits<double>::quiet_NaN(), 
-			Color c=RED, 
+	Node(int d=std::numeric_limits<int>::quiet_NaN(), 
+			Color c=Color::RED, 
 			Node* l=nullptr, 
 			Node* r=nullptr, 
 			Node* p=nullptr);
@@ -30,6 +29,7 @@ public:
 	RB_Tree();
 	RB_Tree(Node* r);
 	~RB_Tree();
+	uint64_t compute_size(Node* n);
 	void insert(Node* n);
 	void insert_recurse(Node* cur_node, Node* n);
 	void insert_repair_tree(Node* n);
@@ -43,8 +43,8 @@ public:
 	void postorder(Node* n, int indent=0);
 	void print();
 	uint64_t get_size();
-	int black_height(Node* root);
-	int bh();
+	uint64_t black_height(Node* root);
+	uint64_t bh();
 	void node_table(Node* n);
 	void node_info(Node* n);
 	void delete_node(Node* n);

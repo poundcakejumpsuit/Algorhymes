@@ -10,14 +10,12 @@
 #include <cmath>
 #include "rbtree.hpp"
 
-// Node::Node() {
-// 	data = std::numeric_limits<double>::quiet_NaN();
-// 	parent = nullptr;
-// 	left = nullptr;
-// 	right = nullptr;
-// 	color = RED;
-// }
-
+/*
+/ Constructor for Node class, with default params:
+	d = std::numeric_limits<double>::quiet_NaN()
+	c = Color::RED
+	l, r, p = nullptr
+*/
 Node::Node(int d, Color c, Node* l, Node* r, Node* p) {
 	data = d;
 	parent = p;
@@ -30,7 +28,6 @@ Node* Node::get_sibling() {
 	if (parent == nullptr) {
 		return nullptr;
 	}
-	//TODO: overload equality for duplicate values?
 	if (this == parent->left) {
 		return parent->right;
 	}
@@ -85,10 +82,27 @@ RB_Tree::RB_Tree() {
 
 RB_Tree::RB_Tree(Node* r) {
 	root = r;
+	size = this->compute_size(root);
+}
+
+/* 
+/ only to be used on the creation of a tree from existing nodes, otherwise will
+/ duplicate height
+*/
+uint64_t RB_Tree::compute_size(Node* n) {
+	if (n != nullptr) {
+		size++;
+	}
+	if (n->left)
+		compute_size(n->left);
+	if (n->right)
+		compute_size(n->right);
+	std::cout << "COMPUTE SIZE: " << size << std::endl;
+	return size;
 }
 
 RB_Tree::~RB_Tree() {
-	//pass, as there is no heap allocation
+	//TODO
 }
 
 void RB_Tree::rotate_left(Node* n) {
@@ -143,7 +157,7 @@ void RB_Tree::postorder(Node * p, int indent) {
         }
         if (p->right) std::cout<<" /\n" << std::setw(indent) << ' ';
         std::string clr;
-        p->color ? clr = "B" : clr = "R";
+        (p->color == Color::BLACK) ? clr = "B" : clr = "R";
         std::cout<< p->data << clr << "\n ";
         if(p->left) {
             std::cout << std::setw(indent) << ' ' <<" \\\n";
@@ -160,6 +174,10 @@ void RB_Tree::node_table(Node* n) {
 	}
 }
 
+/*
+/ Look, I know this is a bad idea... I just wanted to do some wacky ternary stuff.
+/ This isn't production!! 
+*/
 void RB_Tree::node_info(Node* n) {
 	std::cout << "Node: " << n->data << " left: " << ((n->left != nullptr) ? n->left->data : -1) <<
 		 " right: " << (n->right ? n->right->data : -1) << " parent: " << 
@@ -206,10 +224,6 @@ void RB_Tree::insert_recurse(Node* cur_node, Node* n) {
 	else if (cur_node != nullptr) {
 		//non-leaf node
 		if (cur_node->right != nullptr) {
-			if (cur_node->left != nullptr) {
-				insert_recurse(cur_node->right, n);
-				return;
-			}
 			insert_recurse(cur_node->right, n);
 			return;
 		}
@@ -226,17 +240,17 @@ void RB_Tree::insert_recurse(Node* cur_node, Node* n) {
 	n->parent = cur_node;
 	n->left = nullptr;
 	n->right = nullptr;
-	n->color = RED;
+	n->color = Color::RED;
 }
 
 void RB_Tree::insert_repair_tree(Node* n) {
 	if (n->parent == nullptr) {
 		insert_case1(n);
 	}
-	else if (n->parent->color == BLACK) {
+	else if (n->parent->color == Color::BLACK) {
 		insert_case2(n);
 	}
-	else if (n->get_uncle() != nullptr && n->get_uncle()->color == RED) {
+	else if (n->get_uncle() != nullptr && n->get_uncle()->color == Color::RED) {
 		insert_case3(n);
 	}
 	else {
@@ -247,7 +261,7 @@ void RB_Tree::insert_repair_tree(Node* n) {
 void RB_Tree::insert_case1(Node* n) {
 	//n is root
 	if (n->parent == nullptr) {
-		n->color = BLACK;
+		n->color = Color::BLACK;
 	}
 }
 
@@ -257,24 +271,27 @@ void RB_Tree::insert_case2(Node* n) {
 }
 
 void RB_Tree::insert_case3(Node* n) {
-	n->parent->color = BLACK;
-	n->get_uncle()->color = BLACK;
-	n->get_grandparent()->color = RED;
+	//n has a red uncle
+	n->parent->color = Color::BLACK;
+	n->get_uncle()->color = Color::BLACK;
+	n->get_grandparent()->color = Color::RED;
 	insert_repair_tree(n->get_grandparent());
 }
 
 void RB_Tree::insert_case4(Node* n) {
 	Node* p = n->parent;
 	Node* g = n->get_grandparent();
-	if (g->left != nullptr && 
-		g->left->right != nullptr && 
-		n == g->left->right) {
+	if ((g->left != nullptr) && 
+		(g->left->right != nullptr) && 
+		(n == g->left->right)) 
+	{
 		rotate_left(p);
 		n = n->left;
 	}
 	else if (g->right != nullptr && 
 			 g->right->left != nullptr && 
-			 n == g->right->left) {
+			 n == g->right->left) 
+	{
 		rotate_right(p);
 		n = n->right;
 	}
@@ -290,8 +307,8 @@ void RB_Tree::insert_case4step2(Node* n) {
 	else {
 		rotate_left(g);
 	}
-	p->color = BLACK;
-	g->color = RED;
+	p->color = Color::BLACK;
+	g->color = Color::RED;
 }
 
 Node* RB_Tree::copy_node(Node* orig) {
@@ -299,6 +316,10 @@ Node* RB_Tree::copy_node(Node* orig) {
 	return n;
 }
 
+
+/*
+/ Controller function for handling delete cases
+*/
 void RB_Tree::delete_node(Node* n) {
 	if (!(n->left) && !(n->right)) {
 		std::cout << "HERE" << std::endl;
@@ -351,8 +372,8 @@ void RB_Tree::delete_a_child(Node* n) {
 	}
 	std::cout << "CHILD: " << child->data << std::endl;
 	replace_node(n, child);
-	if (n->color == BLACK) {
-		if (child->color == RED) child->color = BLACK;
+	if (n->color == Color::BLACK) {
+		if (child->color == Color::RED) child->color = Color::BLACK;
 	  	else if (n->parent != nullptr) delete_case1(child);
 	}
 	delete n;
@@ -360,9 +381,9 @@ void RB_Tree::delete_a_child(Node* n) {
 
 void RB_Tree::delete_case1(Node* n) {
 	Node* s = n->get_sibling();
-	if (s->color == RED) {
-		n->parent->color = RED;
-		s->color = BLACK;
+	if (s->color == Color::RED) {
+		n->parent->color = Color::RED;
+		s->color = Color::BLACK;
 		if (n == n->parent->left) rotate_left(n->parent);
 		else rotate_right(n->parent);
 	}
@@ -371,11 +392,11 @@ void RB_Tree::delete_case1(Node* n) {
 
 void RB_Tree::delete_case2(Node* n) {
 	Node* s = n->get_sibling();
-	if ((n->parent->color == BLACK) &&
-     	 (s->color == BLACK) &&
-     	 (s->left->color == BLACK) &&
-     	 (s->right->color == BLACK)) {
-  		s->color = RED;
+	if ((n->parent->color == Color::BLACK) &&
+     	 (s->color == Color::BLACK) &&
+     	 (s->left->color == Color::BLACK) &&
+     	 (s->right->color == Color::BLACK)) {
+  		s->color = Color::RED;
   		if (n->parent->parent) delete_case1(n->parent);
  	} 
  	else delete_case3(n);
@@ -383,31 +404,31 @@ void RB_Tree::delete_case2(Node* n) {
 
 void RB_Tree::delete_case3(Node* n) {
 	Node* s = n->get_sibling();
-	if ((n->parent->color == RED) &&
-    	(s->color == BLACK) &&
-    	(s->left->color == BLACK) &&
-    	(s->right->color == BLACK)) {
-  		s->color = RED;
-  		n->parent->color = BLACK;
+	if ((n->parent->color == Color::RED) &&
+    	(s->color == Color::BLACK) &&
+    	(s->left->color == Color::BLACK) &&
+    	(s->right->color == Color::BLACK)) {
+  		s->color = Color::RED;
+  		n->parent->color = Color::BLACK;
  	} 
  	else delete_case4(n);
 }
 
 void RB_Tree::delete_case4(Node* n) {
 	Node* s = n->get_sibling();
-	if (s->color == BLACK) {
+	if (s->color == Color::BLACK) {
 		if ((n == n->parent->left) &&
-			(s->right->color == BLACK) &&
-			(s->left->color == RED)) {
-			s->color = RED;
-			s->left->color = BLACK;
+			(s->right->color == Color::BLACK) &&
+			(s->left->color == Color::RED)) {
+			s->color = Color::RED;
+			s->left->color = Color::BLACK;
 			rotate_right(s);
 		}
 		else if ((n == n->parent->right) &&
-				 (s->left->color == BLACK) &&
-				 (s->right->color == RED)) {
-			s->color = RED;
-			s->right->color = BLACK;
+				 (s->left->color == Color::BLACK) &&
+				 (s->right->color == Color::RED)) {
+			s->color = Color::RED;
+			s->right->color = Color::BLACK;
 			rotate_left(s);
 		}
 	}
@@ -417,13 +438,13 @@ void RB_Tree::delete_case4(Node* n) {
 void RB_Tree::delete_case5(Node* n) {
 	Node* s = n->get_sibling();
 	s->color = n->parent->color;
- 	n->parent->color = BLACK;
+ 	n->parent->color = Color::BLACK;
 	if (n == n->parent->left) {
-  		s->right->color = BLACK;
+  		s->right->color = Color::BLACK;
   		rotate_left(n->parent);
  	} 
  	else {
-  		s->left->color = BLACK;
+  		s->left->color = Color::BLACK;
   		rotate_right(n->parent);
  	}
 }
@@ -432,20 +453,20 @@ uint64_t RB_Tree::get_size() {
 	return size;
 }
 
-int RB_Tree::black_height(Node* root) {
+uint64_t RB_Tree::black_height(Node* root) {
     if (root == nullptr) {
         return true;
     }
     else {
         int left = black_height(root->left);
-        if (root->color == BLACK) {
+        if (root->color == Color::BLACK) {
             left++;
         }
         return left;
     }
 }
 
-int RB_Tree::bh() {
+uint64_t RB_Tree::bh() {
 	return black_height(root);
 }
 
@@ -466,12 +487,11 @@ int main(int argc, char* argv[]) {
 	// std::shuffle(std::begin(v), std::end(v), rng);
 	RB_Tree* rb = new RB_Tree();
 	for (auto el: v) {
-		// std::cout <<"EL: " << el->data << std::endl;
 		rb->insert(el);
 	}
 	rb->print();
-	rb->delete_node(v[0]);
-	rb->print();
+	// rb->delete_node(v[7]);
+	// rb->print();
 	bool s = rb->bh() == std::ceil(std::log2(num + 1));
 	bool c = v.size() == rb->get_size();
 	std::cout << std::ceil(std::log2(num + 1)) << " " << rb->bh() << std::endl;
